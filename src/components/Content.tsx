@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
-import { api } from '../services/api';
+import { Header } from '.././components/Header';
+import { MovieCard } from '.././components/MovieCard';
 
-import { MovieCard } from '../components/MovieCard';
+import { api } from '.././services/api';
+import '.././styles/content.scss';
+
+interface GenreResponseProps {
+  id: number;
+  name: 'action' | 'comedy' | 'documentary' | 'drama' | 'horror' | 'family';
+  title: string;
+}
 
 interface MovieProps {
-  imdbID: string;
   Title: string;
   Poster: string;
   Ratings: Array<{
@@ -14,17 +21,14 @@ interface MovieProps {
   Runtime: string;
 }
 
-interface GenreResponseProps {
-  id: number;
-  name: 'action' | 'comedy' | 'documentary' | 'drama' | 'horror' | 'family';
-  title: string;
+interface IContentProps {
+  selectedGenreId:number;
 }
 
-export function Content() {
+export function Content({ selectedGenreId }:IContentProps) {
   const [movies, setMovies] = useState<MovieProps[]>([]);
-  const [selectedGenreId, setSelectedGenreId] = useState(1);
   const [selectedGenre, setSelectedGenre] = useState<GenreResponseProps>({} as GenreResponseProps);
-  
+
   useEffect(() => {
     api.get<MovieProps[]>(`movies/?Genre_id=${selectedGenreId}`).then(response => {
       setMovies(response.data);
@@ -36,18 +40,15 @@ export function Content() {
   }, [selectedGenreId]);
 
   return (
-    <>
-      <header>
-            <span className="category">Categoria:<span> {selectedGenre.title}</span></span>
-          </header>
-
-          <main>
-            <div className="movies-list">
-              {movies.map(movie => (
-                <MovieCard key ={movie.imdbID} title={movie.Title} poster={movie.Poster} runtime={movie.Runtime} rating={movie.Ratings[0].Value} />
-              ))}
-            </div>
-          </main>
-    </>
+    <div className="container">
+    <Header selectedGenreTitle={selectedGenre.title} />
+    <main>
+      <div className="movies-list">
+        {movies.map(movie => (
+          <MovieCard title={movie.Title} poster={movie.Poster} runtime={movie.Runtime} rating={movie.Ratings[0].Value} />
+        ))}
+      </div>
+    </main>
+  </div>
   )
 }
